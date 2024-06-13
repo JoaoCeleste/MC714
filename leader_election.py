@@ -10,23 +10,23 @@ LEADER = 2
 
 def main():
     if rank == 0:
-        # Processo 0 inicia a eleição com um líder aleatório
+        # Process 0 starts the leader election with a random leader
         leader = random.randint(0, size - 1)
         print(f"Process {rank} starting leader election with initial leader {leader}")
-        # Processo 0 envia a mensagem de eleição para todos os processos
+        # Process 0 sends election message to all other processes
         for i in range(size):
             if i != rank:
                 comm.isend((ELECTION, leader), dest=i, tag=ELECTION)
     
     leader = None
     while True:
-        # Recebe mensagens de outros processos
+        # Receive messages from other processes
         status = MPI.Status()
         msg = comm.recv(source=MPI.ANY_SOURCE, tag=MPI.ANY_TAG, status=status)
         tag = status.Get_tag()
         
         if tag == ELECTION:
-            # Recebe a mensagem de eleição e retransmite como mensagem de liderança
+            # Receive election message and forward as leader message
             _, proposed_leader = msg
             print(f"Process {rank} received ELECTION with proposed leader {proposed_leader}")
             leader = proposed_leader
@@ -34,12 +34,12 @@ def main():
                 if i != rank:
                     comm.isend((LEADER, leader), dest=i, tag=LEADER)
         elif tag == LEADER:
-            # Recebe a mensagem de liderança e reconhece o líder
+            # Receive leader message and acknowledge the leader
             _, leader = msg
             print(f"Process {rank} acknowledges leader {leader}")
             break
     
-    # Garante que todos os processos cheguem ao ponto de saída ao mesmo tempo
+    # Ensure all processes reach the exit point at the same time
     comm.barrier()
     print(f"Process {rank} exiting with leader {leader}")
 
