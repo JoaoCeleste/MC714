@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  lamport:
+    build: .
+    container_name: lamport
+    command: ["mpirun", "--allow-run-as-root", "-np", "3", "python", "lamport.py"]

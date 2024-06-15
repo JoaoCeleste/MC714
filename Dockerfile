@@ -1,21 +1,20 @@
-FROM python:3.8-slim
+# Usar uma imagem base do Python
+FROM python:3.9-slim
 
+# Instalar pacotes necessários
 RUN apt-get update && apt-get install -y \
     build-essential \
     openmpi-bin \
-    openmpi-common \
-    libopenmpi-dev && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    libopenmpi-dev
 
+# Instalar mpi4py
 RUN pip install mpi4py
 
-# Criar um usuário não-root
-RUN useradd -m mpiuser
-USER mpiuser
+# Criar um diretório de trabalho
+WORKDIR /usr/src/app
 
-WORKDIR /app
+# Copiar o código-fonte para o contêiner
+COPY . .
 
-COPY . /app
-
-CMD ["mpirun", "-np", "4", "python", "leader_election.py"]
+# Comando padrão para executar o contêiner
+CMD ["mpirun", "--allow-run-as-root", "-np", "3", "python", "script.py"]
