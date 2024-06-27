@@ -2,9 +2,9 @@
 
 
 1. Instalar o Docker e garantir que ele esteja rodando
-2. Mudar na linha 21 da Dockerfile o ultimo argumento com qual dos algoritimos você quer rodar : "lamport_clock.py", "leader_election.py", "mutex.py"
-3. Abrir um terminal no diretorio em que os arquivos estão
-4. Escrever a seguinte linha de comando: docker-compose up --build
-5. Caso queira ver somente os resultados: docker-compose logs -f
-6. Limpe os containers com: docker-compose down 
-7. Caso queira testar os outros algoritimos repita do passo 2
+2. Abrir um terminal no diretorio em que os arquivos estão
+3. Escrever a seguinte linha de comando: docker-compose -f docker-compose-script.yml up --build (Substituindo script por lamport,mutex ou leader)
+4. Para limpar os conteiners criados depois do teste docker-compose -f docker-compose-script.yml down
+5. Caso queira testar os outros algoritimos repita do passo 2
+
+Obs: Até o momento não consegui ajustar o algoritimo de lamport para encerrar automaticamente, após execução pode para a execução utilizando Ctrl+C

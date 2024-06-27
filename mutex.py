@@ -5,43 +5,26 @@ comm = MPI.COMM_WORLD
 rank = comm.Get_rank()
 size = comm.Get_size()
 
-def critical_section():
-    print(f"Process {rank} entering critical section")
-    time.sleep(2)  # Simulate critical section
-    print(f"Process {rank} leaving critical section")
+def request_critical_section(rank):
+    print(f"Processo {rank} solicitando seção crítica")
+    for i in range(size):
+        if i != rank:
+            comm.send(rank, dest=i, tag=0)
+    acks = 0
+    while acks < size - 1:
+        data = comm.recv(tag=0)
+        acks += 1
+        print(f"Processo {rank} recebeu ACK de {data}")
 
-def handle_message():
-    status = MPI.Status()
-    msg = comm.recv(source=MPI.ANY_SOURCE, status=status)
-    source = status.Get_source()
-    
-    if msg == "REQUEST":
-        print(f"Process {rank} received REQUEST from Process {source}")
-        comm.send("GRANT", dest=source)
-    elif msg == "GRANT":
-        print(f"Process {rank} received GRANT from Process {source}")
-    elif msg == "RELEASE":
-        print(f"Process {rank} received RELEASE from Process {source}")
-    elif msg == "TERMINATE":
-        print(f"Process {rank} received TERMINATE from Process {source}")
-        return False  # Indicate to stop receiving messages
-    return True  # Indicate to continue receiving messages
-
-def main():
-    if rank == 0:
-        # Process 0 requests critical section access
-        comm.send("REQUEST", dest=1)
-        handle_message()  # Wait for GRANT
-        
-        critical_section()
-        
-        comm.send("RELEASE", dest=1)
-        comm.send("TERMINATE", dest=1)  # Signal termination
-    elif rank == 1:
-        # Process 1 handles the messages
-        running = True
-        while running:
-            running = handle_message()
+def release_critical_section(rank):
+    print(f"Processo {rank} liberando seção crítica")
+    for i in range(size):
+        if i != rank:
+            comm.send(rank, dest=i, tag=1)
 
 if __name__ == "__main__":
-    main()
+    time.sleep(rank)
+    request_critical_section(rank)
+    print(f"Processo {rank} está na seção crítica")
+    time.sleep(2)
+    release_critical_section(rank)
